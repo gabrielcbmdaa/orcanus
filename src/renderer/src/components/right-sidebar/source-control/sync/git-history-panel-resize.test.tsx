@@ -1,13 +1,17 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { GitHistoryPanel } from './git-history-panel'
 
 afterEach(cleanup)
+// Why: happy-dom defaults to 768px, where the viewport cap would mask the bounds under test.
+beforeEach(() => {
+  window.innerHeight = 2_000
+})
 
 function renderPanel(height: number, onHeightChange = vi.fn()) {
-  render(
+  const view = render(
     <TooltipProvider>
       <GitHistoryPanel
         state={{ status: 'idle' }}
@@ -19,7 +23,23 @@ function renderPanel(height: number, onHeightChange = vi.fn()) {
       />
     </TooltipProvider>
   )
-  return { onHeightChange, separator: screen.getByRole('separator', { name: 'Resize commits' }) }
+  return {
+    onHeightChange,
+    rerenderWithHeight: (next: number) =>
+      view.rerender(
+        <TooltipProvider>
+          <GitHistoryPanel
+            state={{ status: 'idle' }}
+            collapsed={false}
+            height={next}
+            onHeightChange={onHeightChange}
+            onToggle={vi.fn()}
+            onRefresh={vi.fn()}
+          />
+        </TooltipProvider>
+      ),
+    separator: screen.getByRole('separator', { name: 'Resize commits' })
+  }
 }
 
 describe('GitHistoryPanel resize', () => {
@@ -80,5 +100,40 @@ describe('GitHistoryPanel resize', () => {
 
     fireEvent.keyDown(separator, { key: 'Home' })
     expect(onHeightChange).toHaveBeenLastCalledWith(96)
+  })
+
+  it('reports the viewport-capped height, not the stored one, on a short window', () => {
+    // Why: a stored 520 rendered as min(520, 33vh) left the drag seeded 223px above what is on
+    // screen, so the first third of a downward drag did nothing.
+    window.innerHeight = 900
+
+    const { separator } = renderPanel(520)
+
+    expect(separator.getAttribute('aria-valuenow')).toBe('297')
+  })
+
+  it('nudges down from what is on screen, not from the stored height', () => {
+    window.innerHeight = 900
+
+    const { onHeightChange, separator } = renderPanel(520)
+    fireEvent.keyDown(separator, { key: 'ArrowDown' })
+
+    expect(onHeightChange).toHaveBeenCalledWith(281)
+  })
+
+  it('keeps an in-progress drag alive when the stored height changes underneath it', () => {
+    // Why: a ui:changed broadcast from another client used to tear down the window listeners
+    // mid-gesture, cancelling the drag.
+    window.innerHeight = 2_000
+    const { onHeightChange, rerenderWithHeight, separator } = renderPanel(300)
+    separator.setPointerCapture = vi.fn()
+
+    fireEvent.pointerDown(separator, { clientY: 500, pointerId: 1 })
+    rerenderWithHeight(400)
+    fireEvent.pointerMove(window, { clientY: 450 })
+    fireEvent.pointerUp(window, { clientY: 450 })
+
+    expect(onHeightChange).toHaveBeenCalledTimes(1)
+    expect(onHeightChange).toHaveBeenCalledWith(350)
   })
 })
