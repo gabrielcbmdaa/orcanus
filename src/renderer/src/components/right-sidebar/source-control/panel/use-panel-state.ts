@@ -26,6 +26,7 @@ export function useSourceControlPanelState() {
     repositoryHuge,
     settings,
     sourceControlCommitsExpanded,
+    sourceControlCommitsHeight,
     worktreeMap,
     worktreePath
   } = context
@@ -40,6 +41,8 @@ export function useSourceControlPanelState() {
     settings,
     sourceControlCommitsExpanded,
     setSourceControlCommitsExpanded: storeActions.setSourceControlCommitsExpanded,
+    sourceControlCommitsHeight,
+    setSourceControlCommitsHeight: storeActions.setSourceControlCommitsHeight,
     updateSettings: storeActions.updateSettings
   })
   const operationState = useSourceControlWorktreeOperationState({

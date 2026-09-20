@@ -20,10 +20,13 @@ function renderViewState(activeWorktreeId: string | null = 'wt-1') {
   return renderHook(
     ({ id }: { id: string | null }) => {
       const sourceControlCommitsExpanded = useAppStore((s) => s.sourceControlCommitsExpanded)
+      const sourceControlCommitsHeight = useAppStore((s) => s.sourceControlCommitsHeight)
       return useSourceControlPanelViewState({
         activeWorktreeId: id,
         settings: useAppStore.getState().settings,
         sourceControlCommitsExpanded,
+        sourceControlCommitsHeight,
+        setSourceControlCommitsHeight: useAppStore.getState().setSourceControlCommitsHeight,
         setSourceControlCommitsExpanded: useAppStore.getState().setSourceControlCommitsExpanded,
         updateSettings: useAppStore.getState().updateSettings
       })
@@ -60,6 +63,25 @@ describe('useSourceControlPanelViewState commits section', () => {
     rerender({ id: 'wt-2' })
 
     expect(result.current.isGitHistoryExpanded).toBe(true)
+  })
+
+  it('reads the commits height from ui state and persists a resize', () => {
+    const { result } = renderViewState()
+    expect(result.current.gitHistoryHeight).toBe(256)
+
+    act(() => result.current.setGitHistoryHeight(300))
+
+    expect(useAppStore.getState().sourceControlCommitsHeight).toBe(300)
+    expect(result.current.gitHistoryHeight).toBe(300)
+  })
+
+  it('keeps the commits height across a worktree switch', () => {
+    const { result, rerender } = renderViewState('wt-1')
+    act(() => result.current.setGitHistoryHeight(300))
+
+    rerender({ id: 'wt-2' })
+
+    expect(result.current.gitHistoryHeight).toBe(300)
   })
 
   it('still resets the other collapsed sections on a worktree switch', () => {

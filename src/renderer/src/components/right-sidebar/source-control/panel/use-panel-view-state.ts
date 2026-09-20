@@ -23,12 +23,16 @@ export function useSourceControlPanelViewState({
   settings,
   sourceControlCommitsExpanded,
   setSourceControlCommitsExpanded,
+  sourceControlCommitsHeight,
+  setSourceControlCommitsHeight,
   updateSettings
 }: {
   activeWorktreeId: string | null
   settings: SourceControlWorktreeContext['settings']
   sourceControlCommitsExpanded: SourceControlWorktreeContext['sourceControlCommitsExpanded']
   setSourceControlCommitsExpanded: SourceControlStoreActions['setSourceControlCommitsExpanded']
+  sourceControlCommitsHeight: SourceControlWorktreeContext['sourceControlCommitsHeight']
+  setSourceControlCommitsHeight: SourceControlStoreActions['setSourceControlCommitsHeight']
   updateSettings: SourceControlStoreActions['updateSettings']
 }) {
   const sourceControlRef = useRef<HTMLDivElement | null>(null)
@@ -40,6 +44,7 @@ export function useSourceControlPanelViewState({
     createDefaultCollapsedSections
   )
   const isGitHistoryExpanded = sourceControlCommitsExpanded
+  const gitHistoryHeight = sourceControlCommitsHeight
   const collapsedSections = useMemo(() => {
     if (isGitHistoryExpanded) {
       return localCollapsedSections
@@ -115,6 +120,7 @@ export function useSourceControlPanelViewState({
     fileListScrollElement,
     filterExpanded,
     filterQuery,
+    gitHistoryHeight,
     handleToggleSourceControlViewMode,
     isGitHistoryExpanded,
     isMac,
@@ -122,6 +128,7 @@ export function useSourceControlPanelViewState({
     setFileListScrollElement,
     setFilterExpanded,
     setFilterQuery,
+    setGitHistoryHeight: setSourceControlCommitsHeight,
     sourceControlGroupOrder,
     sourceControlRef,
     sourceControlViewMode,

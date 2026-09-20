@@ -138,7 +138,7 @@ describe('useSourceControlStoreActions store subscriptions', () => {
       (key) => typeof returned[key] === 'function'
     )
 
-    expect(returnedActionKeys.length).toBe(41)
+    expect(returnedActionKeys.length).toBe(42)
     for (const key of returnedActionKeys) {
       expect(returned[key]).toBe(state[key])
     }

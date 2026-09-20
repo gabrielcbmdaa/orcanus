@@ -19,6 +19,8 @@ export function SourceControlPanelContent(props: SourceControlPanelReadyProps) {
     branchSummary,
     collapsedSections,
     collapsedTreeDirs,
+    gitHistoryHeight,
+    setGitHistoryHeight,
     conflictOperation,
     diffCommentCountByPath,
     displaySections,
@@ -213,6 +215,8 @@ export function SourceControlPanelContent(props: SourceControlPanelReadyProps) {
           <GitHistoryPanel
             state={gitHistoryState}
             collapsed={collapsedSections.has('history')}
+            height={gitHistoryHeight}
+            onHeightChange={setGitHistoryHeight}
             onToggle={() => toggleSection('history')}
             onRefresh={() => void refreshGitHistory()}
             onOpenCommit={(item) => void openHistoryCommitDiff(item)}
