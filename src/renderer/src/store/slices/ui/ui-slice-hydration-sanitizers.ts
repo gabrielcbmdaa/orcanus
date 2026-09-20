@@ -48,7 +48,7 @@ type PersistedPanelLayout = Pick<
 // user last saw, not snap to the hardcoded default.
 export function sanitizePersistedPanelLayout(
   ui: PersistedUIState,
-  current: Omit<PersistedPanelLayout, 'sourceControlCommitsExpanded'>
+  current: PersistedPanelLayout
 ): PersistedPanelLayout {
   return {
     markdownTocPanelWidth: clampMarkdownTocPanelWidth(
@@ -61,7 +61,10 @@ export function sanitizePersistedPanelLayout(
       undefined,
       current.combinedDiffFileTreeWidth
     ),
-    sourceControlCommitsExpanded: ui.sourceControlCommitsExpanded === true,
+    sourceControlCommitsExpanded:
+      typeof ui.sourceControlCommitsExpanded === 'boolean'
+        ? ui.sourceControlCommitsExpanded
+        : current.sourceControlCommitsExpanded,
     sourceControlCommitsHeight: clampSourceControlCommitsHeight(
       ui.sourceControlCommitsHeight,
       current.sourceControlCommitsHeight
