@@ -38,6 +38,10 @@ export type PersistedUIState = {
   rightSidebarWidth: number
   markdownTocPanelWidth?: number
   combinedDiffFileTreeWidth?: number
+  /** Source Control COMMITS section stays expanded across tab and worktree switches. Per-user, not per-workspace. */
+  sourceControlCommitsExpanded?: boolean
+  /** User-dragged height of the Source Control COMMITS section. Per-user, not per-workspace. */
+  sourceControlCommitsHeight?: number
   groupBy: 'none' | 'workspace-status' | 'repo' | 'pr-status'
   sortBy: 'name' | 'smart' | 'recent' | 'repo' | 'manual'
   /** Project header ordering in `groupBy: 'repo'`, independent of `sortBy`: 'manual' uses persisted order + header drag, 'recent' by latest visible activity. */

@@ -13,6 +13,7 @@ import { normalizeUsagePercentageDisplay } from '../../../shared/usage-percentag
 import { normalizeStatusBarUsageMode } from '../../../shared/status-bar-usage-mode'
 import { clampMarkdownTocPanelWidth } from '../../../shared/markdown-toc-panel-width'
 import { clampCombinedDiffFileTreeWidth } from '../../../shared/combined-diff-file-tree-width'
+import { clampSourceControlCommitsHeight } from '../../../shared/source-control-commits-height'
 import {
   normalizeVisibleExecutionHostIds,
   normalizeExecutionHostOrder
@@ -147,6 +148,12 @@ export function updatePersistedUI(
     ),
     combinedDiffFileTreeWidth: clampCombinedDiffFileTreeWidth(
       sanitizedUpdates.combinedDiffFileTreeWidth ?? operations.state.ui?.combinedDiffFileTreeWidth
+    ),
+    sourceControlCommitsExpanded:
+      (sanitizedUpdates.sourceControlCommitsExpanded ??
+        operations.state.ui?.sourceControlCommitsExpanded) === true,
+    sourceControlCommitsHeight: clampSourceControlCommitsHeight(
+      sanitizedUpdates.sourceControlCommitsHeight ?? operations.state.ui?.sourceControlCommitsHeight
     ),
     visibleWorkspaceHostIds:
       sanitizedUpdates.visibleWorkspaceHostIds !== undefined

@@ -626,6 +626,29 @@ describe('createUISlice hydratePersistedUI', () => {
     expect(store.getState().combinedDiffFileTreeWidth).toBe(640)
   })
 
+  it('restores the source control commits layout from persisted ui', () => {
+    const store = createUIStore()
+
+    store
+      .getState()
+      .hydratePersistedUI(
+        makePersistedUI({ sourceControlCommitsExpanded: true, sourceControlCommitsHeight: 300 })
+      )
+
+    expect(store.getState().sourceControlCommitsExpanded).toBe(true)
+    expect(store.getState().sourceControlCommitsHeight).toBe(300)
+  })
+
+  it('clamps persisted source control commits heights into the supported range', () => {
+    const store = createUIStore()
+
+    store.getState().hydratePersistedUI(makePersistedUI({ sourceControlCommitsHeight: 10 }))
+    expect(store.getState().sourceControlCommitsHeight).toBe(96)
+
+    store.getState().hydratePersistedUI(makePersistedUI({ sourceControlCommitsHeight: 5_000 }))
+    expect(store.getState().sourceControlCommitsHeight).toBe(520)
+  })
+
   it('preserves right sidebar widths above the former 500px cap', () => {
     const store = createUIStore()
 

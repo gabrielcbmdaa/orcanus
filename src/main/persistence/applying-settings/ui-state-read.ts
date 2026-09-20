@@ -13,6 +13,7 @@ import { normalizeUsagePercentageDisplay } from '../../../shared/usage-percentag
 import { normalizeStatusBarUsageMode } from '../../../shared/status-bar-usage-mode'
 import { clampMarkdownTocPanelWidth } from '../../../shared/markdown-toc-panel-width'
 import { clampCombinedDiffFileTreeWidth } from '../../../shared/combined-diff-file-tree-width'
+import { clampSourceControlCommitsHeight } from '../../../shared/source-control-commits-height'
 import {
   normalizeVisibleExecutionHostIds,
   normalizeExecutionHostOrder
@@ -61,6 +62,10 @@ export function getPersistedUI(
     osc52ClipboardDefaultOnNoticePending: state.ui?.osc52ClipboardDefaultOnNoticePending === true,
     markdownTocPanelWidth: clampMarkdownTocPanelWidth(state.ui?.markdownTocPanelWidth),
     combinedDiffFileTreeWidth: clampCombinedDiffFileTreeWidth(state.ui?.combinedDiffFileTreeWidth),
+    sourceControlCommitsExpanded: state.ui?.sourceControlCommitsExpanded === true,
+    sourceControlCommitsHeight: clampSourceControlCommitsHeight(
+      state.ui?.sourceControlCommitsHeight
+    ),
     visibleWorkspaceHostIds: normalizeVisibleExecutionHostIds(state.ui?.visibleWorkspaceHostIds),
     agentsVisibleHostIds: normalizeVisibleExecutionHostIds(state.ui?.agentsVisibleHostIds),
     workspaceHostOrder: normalizeExecutionHostOrder(state.ui?.workspaceHostOrder),

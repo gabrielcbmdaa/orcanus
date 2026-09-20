@@ -18,6 +18,7 @@ import { persistedUIValuesEqual } from '../../../../../shared/persisted-ui-equal
 import { DEFAULT_STATUS_BAR_ITEMS } from '../../../../../shared/constants'
 import { clampMarkdownTocPanelWidth } from '../../../../../shared/markdown-toc-panel-width'
 import { clampCombinedDiffFileTreeWidth } from '../../../../../shared/combined-diff-file-tree-width'
+import { clampSourceControlCommitsHeight } from '../../../../../shared/source-control-commits-height'
 import type { UISlice } from './ui-slice-contract'
 
 const MIN_SIDEBAR_WIDTH = 220
@@ -35,13 +36,19 @@ export function preserveStringArrayIdentity<T extends string>(
     : next
 }
 
-type PersistedPanelLayout = Pick<AppState, 'markdownTocPanelWidth' | 'combinedDiffFileTreeWidth'>
+type PersistedPanelLayout = Pick<
+  AppState,
+  | 'markdownTocPanelWidth'
+  | 'combinedDiffFileTreeWidth'
+  | 'sourceControlCommitsExpanded'
+  | 'sourceControlCommitsHeight'
+>
 
 // Why fall back to the store's current value: a malformed on-disk number should keep what the
 // user last saw, not snap to the hardcoded default.
 export function sanitizePersistedPanelLayout(
   ui: PersistedUIState,
-  current: PersistedPanelLayout
+  current: Omit<PersistedPanelLayout, 'sourceControlCommitsExpanded'>
 ): PersistedPanelLayout {
   return {
     markdownTocPanelWidth: clampMarkdownTocPanelWidth(
@@ -53,6 +60,11 @@ export function sanitizePersistedPanelLayout(
       ui.combinedDiffFileTreeWidth,
       undefined,
       current.combinedDiffFileTreeWidth
+    ),
+    sourceControlCommitsExpanded: ui.sourceControlCommitsExpanded === true,
+    sourceControlCommitsHeight: clampSourceControlCommitsHeight(
+      ui.sourceControlCommitsHeight,
+      current.sourceControlCommitsHeight
     )
   }
 }

@@ -16,6 +16,8 @@ export type PersistedUIWriteBaseline = {
   rightSidebarWidth: number
   markdownTocPanelWidth: number
   combinedDiffFileTreeWidth: number
+  sourceControlCommitsExpanded: boolean
+  sourceControlCommitsHeight: number
   groupBy: PersistedUIState['groupBy']
   sortBy: PersistedUIState['sortBy']
   projectOrderBy: PersistedUIState['projectOrderBy']
@@ -45,6 +47,8 @@ const PERSISTED_UI_WRITE_BASELINE_FIELD_SET = {
   rightSidebarWidth: true,
   markdownTocPanelWidth: true,
   combinedDiffFileTreeWidth: true,
+  sourceControlCommitsExpanded: true,
+  sourceControlCommitsHeight: true,
   groupBy: true,
   sortBy: true,
   projectOrderBy: true,
