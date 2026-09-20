@@ -76,6 +76,7 @@ export function useSourceControlWorktreeContext() {
   const isRemoteOperationActive = useAppStore((s) => s.isRemoteOperationActive)
   const inFlightRemoteOpKind = useAppStore((s) => s.inFlightRemoteOpKind)
   const settings = useAppStore((s) => s.settings)
+  const sourceControlCommitsExpanded = useAppStore((s) => s.sourceControlCommitsExpanded)
   const hostedReviewCacheKey =
     activeRepo && branchName
       ? getHostedReviewCacheKey(
@@ -177,6 +178,7 @@ export function useSourceControlWorktreeContext() {
     repositoryHuge,
     rightSidebarTab,
     settings,
+    sourceControlCommitsExpanded,
     worktreeMap,
     worktreePath
   }

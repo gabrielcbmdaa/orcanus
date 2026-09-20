@@ -55,6 +55,7 @@ export function useSourceControlStoreActions() {
       setPullRequestGenerationRecord: state.setPullRequestGenerationRecord,
       setRightSidebarOpen: state.setRightSidebarOpen,
       setRightSidebarTab: state.setRightSidebarTab,
+      setSourceControlCommitsExpanded: state.setSourceControlCommitsExpanded,
       setUpstreamStatus: state.setUpstreamStatus,
       syncBranch: state.syncBranch,
       updateCommitMessageGenerationRecord: state.updateCommitMessageGenerationRecord,
