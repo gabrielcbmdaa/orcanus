@@ -29,8 +29,6 @@ import {
   normalizeWorkspaceStatuses
 } from '../../../../../shared/workspace-statuses'
 import { PET_SIZE_DEFAULT, PET_SIZE_MAX, PET_SIZE_MIN } from '../../../../../shared/pet-types'
-import { clampMarkdownTocPanelWidth } from '../../../../../shared/markdown-toc-panel-width'
-import { clampCombinedDiffFileTreeWidth } from '../../../../../shared/combined-diff-file-tree-width'
 import { parsePersistedAutomationHostFilter } from '../../../../../shared/automation-host-filter'
 import { normalizeUsagePercentageDisplay } from '../../../../../shared/usage-percentage-display'
 import { normalizeStatusBarUsageMode } from '../../../../../shared/status-bar-usage-mode'
@@ -59,7 +57,8 @@ import {
   sanitizeWorkspaceCleanupDismissals,
   sanitizePersistedSidebarWidth,
   hydratedUIPartialMatchesState,
-  clampPetSize
+  clampPetSize,
+  sanitizePersistedPanelLayout
 } from './ui-slice-hydration-sanitizers'
 import { hydrateAgentReadState, sanitizeTaskResumeState } from './ui-slice-hydration-values'
 import { hydrateStatusBarItems } from './ui-slice-hydration-status-bar-items'
@@ -104,16 +103,7 @@ export function createUiHydrationActions(set: UISliceSet, _get: UISliceGet): Par
             s.rightSidebarWidth,
             MAX_RIGHT_SIDEBAR_WIDTH
           ),
-          markdownTocPanelWidth: clampMarkdownTocPanelWidth(
-            ui.markdownTocPanelWidth,
-            undefined,
-            s.markdownTocPanelWidth
-          ),
-          combinedDiffFileTreeWidth: clampCombinedDiffFileTreeWidth(
-            ui.combinedDiffFileTreeWidth,
-            undefined,
-            s.combinedDiffFileTreeWidth
-          ),
+          ...sanitizePersistedPanelLayout(ui, s),
           rightSidebarOpen: typeof ui.rightSidebarOpen === 'boolean' ? ui.rightSidebarOpen : true,
           rightSidebarTab: rightSidebarRoute.rightSidebarTab,
           rightSidebarExplorerView: rightSidebarRoute.rightSidebarExplorerView,

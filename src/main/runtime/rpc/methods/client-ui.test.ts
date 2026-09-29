@@ -649,6 +649,8 @@ describe('client UI RPC methods', () => {
       rightSidebarExplorerView: 'files',
       rightSidebarWidth: 320,
       markdownTocPanelWidth: 200,
+      sourceControlCommitsExpanded: true,
+      sourceControlCommitsHeight: 300,
       groupBy: 'repo',
       sortBy: 'smart',
       projectOrderBy: 'manual',

@@ -5,10 +5,12 @@ import { normalizeSourceControlViewMode } from '../commit/commit-drafts'
 import type { SourceControlStoreActions } from '../listing/use-store-actions'
 import type { SourceControlWorktreeContext } from '../listing/use-worktree-context'
 
-const DEFAULT_COLLAPSED_SECTIONS = ['history'] as const
+const HISTORY_SECTION = 'history'
 
+// Why: the commits section is persisted ui state so it survives the panel unmounting on a tab
+// switch and the per-worktree reset below; the other sections stay local and reset as before.
 function createDefaultCollapsedSections(): Set<string> {
-  return new Set(DEFAULT_COLLAPSED_SECTIONS)
+  return new Set()
 }
 
 /**
@@ -19,10 +21,18 @@ function createDefaultCollapsedSections(): Set<string> {
 export function useSourceControlPanelViewState({
   activeWorktreeId,
   settings,
+  sourceControlCommitsExpanded,
+  setSourceControlCommitsExpanded,
+  sourceControlCommitsHeight,
+  setSourceControlCommitsHeight,
   updateSettings
 }: {
   activeWorktreeId: string | null
   settings: SourceControlWorktreeContext['settings']
+  sourceControlCommitsExpanded: SourceControlWorktreeContext['sourceControlCommitsExpanded']
+  setSourceControlCommitsExpanded: SourceControlStoreActions['setSourceControlCommitsExpanded']
+  sourceControlCommitsHeight: SourceControlWorktreeContext['sourceControlCommitsHeight']
+  setSourceControlCommitsHeight: SourceControlStoreActions['setSourceControlCommitsHeight']
   updateSettings: SourceControlStoreActions['updateSettings']
 }) {
   const sourceControlRef = useRef<HTMLDivElement | null>(null)
@@ -30,9 +40,17 @@ export function useSourceControlPanelViewState({
   const [fileListScrollElement, setFileListScrollElement] = useState<HTMLDivElement | null>(null)
   const isMac = useMemo(() => navigator.userAgent.includes('Mac'), [])
   const [filterExpanded, setFilterExpanded] = useState(false)
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+  const [localCollapsedSections, setCollapsedSections] = useState<Set<string>>(
     createDefaultCollapsedSections
   )
+  const isGitHistoryExpanded = sourceControlCommitsExpanded
+  const gitHistoryHeight = sourceControlCommitsHeight
+  const collapsedSections = useMemo(() => {
+    if (isGitHistoryExpanded) {
+      return localCollapsedSections
+    }
+    return new Set([...localCollapsedSections, HISTORY_SECTION])
+  }, [isGitHistoryExpanded, localCollapsedSections])
   const persistedSourceControlViewMode = normalizeSourceControlViewMode(
     settings?.sourceControlViewMode
   )
@@ -41,7 +59,6 @@ export function useSourceControlPanelViewState({
   const [collapsedTreeDirs, setCollapsedTreeDirs] = useState<Set<string>>(new Set())
   const [baseRefDialogOpen, setBaseRefDialogOpen] = useState(false)
   const [filterQuery, setFilterQuery] = useState('')
-  const isGitHistoryExpanded = !collapsedSections.has('history')
 
   const handleToggleSourceControlViewMode = useCallback(() => {
     if (!settings) {
@@ -65,17 +82,24 @@ export function useSourceControlPanelViewState({
     // Why: don't reset commit-in-flight state — it's per-worktree; resetting would re-enable Commit for an incoming worktree mid-commit.
   }
 
-  const toggleSection = useCallback((section: string) => {
-    setCollapsedSections((prev) => {
-      const next = new Set(prev)
-      if (next.has(section)) {
-        next.delete(section)
-      } else {
-        next.add(section)
+  const toggleSection = useCallback(
+    (section: string) => {
+      if (section === HISTORY_SECTION) {
+        setSourceControlCommitsExpanded(!isGitHistoryExpanded)
+        return
       }
-      return next
-    })
-  }, [])
+      setCollapsedSections((prev) => {
+        const next = new Set(prev)
+        if (next.has(section)) {
+          next.delete(section)
+        } else {
+          next.add(section)
+        }
+        return next
+      })
+    },
+    [isGitHistoryExpanded, setSourceControlCommitsExpanded]
+  )
 
   const toggleTreeDir = useCallback((key: string) => {
     setCollapsedTreeDirs((prev) => {
@@ -96,6 +120,7 @@ export function useSourceControlPanelViewState({
     fileListScrollElement,
     filterExpanded,
     filterQuery,
+    gitHistoryHeight,
     handleToggleSourceControlViewMode,
     isGitHistoryExpanded,
     isMac,
@@ -103,6 +128,7 @@ export function useSourceControlPanelViewState({
     setFileListScrollElement,
     setFilterExpanded,
     setFilterQuery,
+    setGitHistoryHeight: setSourceControlCommitsHeight,
     sourceControlGroupOrder,
     sourceControlRef,
     sourceControlViewMode,

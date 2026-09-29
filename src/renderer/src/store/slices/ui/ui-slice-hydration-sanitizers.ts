@@ -17,6 +17,9 @@ import {
 } from '../../../../../shared/execution-host'
 import { persistedUIValuesEqual } from '../../../../../shared/persisted-ui-equality'
 import { DEFAULT_STATUS_BAR_ITEMS } from '../../../../../shared/constants'
+import { clampMarkdownTocPanelWidth } from '../../../../../shared/markdown-toc-panel-width'
+import { clampCombinedDiffFileTreeWidth } from '../../../../../shared/combined-diff-file-tree-width'
+import { clampSourceControlCommitsHeight } from '../../../../../shared/source-control-commits-height'
 import type { UISlice } from './ui-slice-contract'
 
 const MIN_SIDEBAR_WIDTH = 220
@@ -32,6 +35,42 @@ export function preserveStringArrayIdentity<T extends string>(
   return current.length === next.length && current.every((value, index) => value === next[index])
     ? (current as T[])
     : next
+}
+
+type PersistedPanelLayout = Pick<
+  AppState,
+  | 'markdownTocPanelWidth'
+  | 'combinedDiffFileTreeWidth'
+  | 'sourceControlCommitsExpanded'
+  | 'sourceControlCommitsHeight'
+>
+
+// Why fall back to the store's current value: a malformed on-disk number should keep what the
+// user last saw, not snap to the hardcoded default.
+export function sanitizePersistedPanelLayout(
+  ui: PersistedUIState,
+  current: PersistedPanelLayout
+): PersistedPanelLayout {
+  return {
+    markdownTocPanelWidth: clampMarkdownTocPanelWidth(
+      ui.markdownTocPanelWidth,
+      undefined,
+      current.markdownTocPanelWidth
+    ),
+    combinedDiffFileTreeWidth: clampCombinedDiffFileTreeWidth(
+      ui.combinedDiffFileTreeWidth,
+      undefined,
+      current.combinedDiffFileTreeWidth
+    ),
+    sourceControlCommitsExpanded:
+      typeof ui.sourceControlCommitsExpanded === 'boolean'
+        ? ui.sourceControlCommitsExpanded
+        : current.sourceControlCommitsExpanded,
+    sourceControlCommitsHeight: clampSourceControlCommitsHeight(
+      ui.sourceControlCommitsHeight,
+      current.sourceControlCommitsHeight
+    )
+  }
 }
 
 export function isPlainPersistedRecord(value: unknown): value is Record<string, unknown> {

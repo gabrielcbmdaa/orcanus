@@ -151,6 +151,8 @@ export function usePersistedUIWriter(): void {
       rightSidebarWidth: s.rightSidebarWidth,
       markdownTocPanelWidth: s.markdownTocPanelWidth,
       combinedDiffFileTreeWidth: s.combinedDiffFileTreeWidth,
+      sourceControlCommitsExpanded: s.sourceControlCommitsExpanded,
+      sourceControlCommitsHeight: s.sourceControlCommitsHeight,
       groupBy: s.groupBy,
       sortBy: s.sortBy,
       projectOrderBy: s.projectOrderBy,

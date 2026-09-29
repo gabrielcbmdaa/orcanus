@@ -5,6 +5,10 @@ import type {
   RightSidebarExplorerView
 } from '../../../../../../shared/ui-chrome-types'
 import { defaultFileSearchState } from '../search/file-search-state'
+import {
+  clampSourceControlCommitsHeight,
+  SOURCE_CONTROL_COMMITS_DEFAULT_HEIGHT
+} from '../../../../../../shared/source-control-commits-height'
 
 export type RightSidebarState = {
   rightSidebarOpen: boolean
@@ -17,6 +21,8 @@ export type RightSidebarState = {
   rightSidebarTabByWorktree: Record<string, ActiveRightSidebarTab>
   rightSidebarExplorerViewByWorktree: Record<string, RightSidebarExplorerView>
   activityBarPosition: ActivityBarPosition
+  sourceControlCommitsExpanded: boolean
+  sourceControlCommitsHeight: number
   toggleRightSidebar: () => void
   setRightSidebarOpen: (open: boolean) => void
   setRightSidebarWidth: (width: number) => void
@@ -30,6 +36,8 @@ export type RightSidebarState = {
   showAiVaultSearch: () => void
   clearAiVaultSearchFocusRequest: () => void
   setActivityBarPosition: (position: ActivityBarPosition) => void
+  setSourceControlCommitsExpanded: (expanded: boolean) => void
+  setSourceControlCommitsHeight: (height: number) => void
 }
 
 export function createRightSidebarState(set: EditorSet, _get: EditorGet): RightSidebarState {
@@ -43,6 +51,8 @@ export function createRightSidebarState(set: EditorSet, _get: EditorGet): RightS
     rightSidebarTabByWorktree: {},
     rightSidebarExplorerViewByWorktree: {},
     activityBarPosition: 'top',
+    sourceControlCommitsExpanded: false,
+    sourceControlCommitsHeight: SOURCE_CONTROL_COMMITS_DEFAULT_HEIGHT,
     toggleRightSidebar: () => set((s) => ({ rightSidebarOpen: !s.rightSidebarOpen })),
     setRightSidebarOpen: (open) => set({ rightSidebarOpen: open }),
     setRightSidebarWidth: (width) => set({ rightSidebarWidth: width }),
@@ -138,6 +148,9 @@ export function createRightSidebarState(set: EditorSet, _get: EditorGet): RightS
         aiVaultSearchFocusRequested: true
       })),
     clearAiVaultSearchFocusRequest: () => set({ aiVaultSearchFocusRequested: false }),
-    setActivityBarPosition: (position) => set({ activityBarPosition: position })
+    setActivityBarPosition: (position) => set({ activityBarPosition: position }),
+    setSourceControlCommitsExpanded: (expanded) => set({ sourceControlCommitsExpanded: expanded }),
+    setSourceControlCommitsHeight: (height) =>
+      set({ sourceControlCommitsHeight: clampSourceControlCommitsHeight(height) })
   }
 }

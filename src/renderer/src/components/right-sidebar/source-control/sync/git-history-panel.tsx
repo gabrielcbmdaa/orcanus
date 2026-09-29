@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { ChevronDown, CircleHelp, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -18,31 +18,19 @@ import {
 } from './git-history-commit-context-menu'
 import type { SourceControlRowOpenEvent } from '../listing/split-open'
 import { translate } from '@/i18n/i18n'
+import { SOURCE_CONTROL_COMMITS_MIN_HEIGHT } from '../../../../../../shared/source-control-commits-height'
+import { useGitHistoryPanelResize } from './use-git-history-panel-resize'
 
 export type GitHistoryPanelState =
   | { status: 'idle' | 'loading'; result?: GitHistoryResult; error?: string }
   | { status: 'refreshing' | 'ready'; result: GitHistoryResult; error?: string }
   | { status: 'error'; result?: GitHistoryResult; error: string }
 
-const DEFAULT_GIT_HISTORY_PANEL_HEIGHT = 256
-const MIN_GIT_HISTORY_PANEL_HEIGHT = 96
-const MAX_GIT_HISTORY_PANEL_HEIGHT = 520
-const MAX_GIT_HISTORY_PANEL_VIEWPORT_HEIGHT = '33vh'
-
-type GitHistoryResizeSession = {
-  startY: number
-  startHeight: number
-  previousCursor: string
-  previousUserSelect: string
-}
-
-function clampGitHistoryPanelHeight(height: number): number {
-  return Math.min(MAX_GIT_HISTORY_PANEL_HEIGHT, Math.max(MIN_GIT_HISTORY_PANEL_HEIGHT, height))
-}
-
 export function GitHistoryPanel({
   state,
   collapsed,
+  height,
+  onHeightChange,
   onToggle,
   onRefresh,
   onOpenCommit,
@@ -52,6 +40,8 @@ export function GitHistoryPanel({
 }: {
   state: GitHistoryPanelState
   collapsed: boolean
+  height: number
+  onHeightChange: (height: number) => void
   onToggle: () => void
   onRefresh: () => void
   onOpenCommit?: (item: GitHistoryItem) => void
@@ -82,8 +72,11 @@ export function GitHistoryPanel({
 
   const loading = state.status === 'loading' || state.status === 'refreshing'
   const count = result?.items.length ?? 0
-  const [panelHeight, setPanelHeight] = useState(DEFAULT_GIT_HISTORY_PANEL_HEIGHT)
-  const resizeSessionRef = useRef<GitHistoryResizeSession | null>(null)
+  const { handleResizeKeyDown, maxHeight, panelHeight, startResize } = useGitHistoryPanelResize({
+    collapsed,
+    height,
+    onHeightChange
+  })
 
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
   const [filesByCommit, setFilesByCommit] = useState<Record<string, GitHistoryCommitFilesState>>({})
@@ -153,77 +146,9 @@ export function GitHistoryPanel({
     [expanded, onLoadCommitFiles, result]
   )
 
-  const stopResize = useCallback((): void => {
-    const session = resizeSessionRef.current
-    if (!session) {
-      return
-    }
-    resizeSessionRef.current = null
-    document.body.style.cursor = session.previousCursor
-    document.body.style.userSelect = session.previousUserSelect
-  }, [])
-
-  const handleResizePointerMove = useCallback((event: PointerEvent): void => {
-    const session = resizeSessionRef.current
-    if (!session) {
-      return
-    }
-    setPanelHeight(clampGitHistoryPanelHeight(session.startHeight + session.startY - event.clientY))
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('pointermove', handleResizePointerMove)
-    window.addEventListener('pointerup', stopResize)
-    window.addEventListener('pointercancel', stopResize)
-    window.addEventListener('blur', stopResize)
-    return () => {
-      window.removeEventListener('pointermove', handleResizePointerMove)
-      window.removeEventListener('pointerup', stopResize)
-      window.removeEventListener('pointercancel', stopResize)
-      window.removeEventListener('blur', stopResize)
-      stopResize()
-    }
-  }, [handleResizePointerMove, stopResize])
-
-  const startResize = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>): void => {
-      if (collapsed) {
-        return
-      }
-      event.preventDefault()
-      resizeSessionRef.current = {
-        startY: event.clientY,
-        startHeight: panelHeight,
-        previousCursor: document.body.style.cursor,
-        previousUserSelect: document.body.style.userSelect
-      }
-      document.body.style.cursor = 'row-resize'
-      document.body.style.userSelect = 'none'
-      event.currentTarget.setPointerCapture(event.pointerId)
-    },
-    [collapsed, panelHeight]
-  )
-
-  const handleResizeKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>): void => {
-    const step = event.shiftKey ? 32 : 16
-    if (event.key === 'ArrowUp') {
-      event.preventDefault()
-      setPanelHeight((height) => clampGitHistoryPanelHeight(height + step))
-    } else if (event.key === 'ArrowDown') {
-      event.preventDefault()
-      setPanelHeight((height) => clampGitHistoryPanelHeight(height - step))
-    } else if (event.key === 'Home') {
-      event.preventDefault()
-      setPanelHeight(MIN_GIT_HISTORY_PANEL_HEIGHT)
-    } else if (event.key === 'End') {
-      event.preventDefault()
-      setPanelHeight(MAX_GIT_HISTORY_PANEL_HEIGHT)
-    }
-  }, [])
-
   const expandedBodyClassName = 'overflow-y-auto scrollbar-sleek'
   const expandedBodyStyle = {
-    height: `min(${panelHeight}px, ${MAX_GIT_HISTORY_PANEL_VIEWPORT_HEIGHT})`
+    height: `${panelHeight}px`
   }
 
   return (
@@ -236,8 +161,8 @@ export function GitHistoryPanel({
             'Resize commits'
           )}
           aria-orientation="horizontal"
-          aria-valuemin={MIN_GIT_HISTORY_PANEL_HEIGHT}
-          aria-valuemax={MAX_GIT_HISTORY_PANEL_HEIGHT}
+          aria-valuemin={SOURCE_CONTROL_COMMITS_MIN_HEIGHT}
+          aria-valuemax={maxHeight}
           aria-valuenow={panelHeight}
           tabIndex={0}
           className="absolute inset-x-0 -top-1 z-10 h-2 cursor-row-resize outline-none focus-visible:bg-ring/30"

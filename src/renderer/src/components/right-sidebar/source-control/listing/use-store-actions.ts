@@ -6,7 +6,7 @@ import { useAppStore } from '@/store'
  *
  * Why `getState()` and not one selector each: zustand action identities are fixed when the store is
  * built and no slice ever puts one in a `set()` payload, so subscribing to them can never fire. The
- * 40 action subscriptions only added 40 live listeners and 40 selector runs to every store write
+ * 42 action subscriptions only added 42 live listeners and 42 selector runs to every store write
  * while the panel was mounted. The two generation-record maps are real state, so they stay
  * subscribed.
  *
@@ -55,6 +55,8 @@ export function useSourceControlStoreActions() {
       setPullRequestGenerationRecord: state.setPullRequestGenerationRecord,
       setRightSidebarOpen: state.setRightSidebarOpen,
       setRightSidebarTab: state.setRightSidebarTab,
+      setSourceControlCommitsExpanded: state.setSourceControlCommitsExpanded,
+      setSourceControlCommitsHeight: state.setSourceControlCommitsHeight,
       setUpstreamStatus: state.setUpstreamStatus,
       syncBranch: state.syncBranch,
       updateCommitMessageGenerationRecord: state.updateCommitMessageGenerationRecord,
