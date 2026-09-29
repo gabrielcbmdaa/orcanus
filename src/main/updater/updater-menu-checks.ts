@@ -3,11 +3,12 @@ import { is } from '@electron-toolkit/utils'
 import type { UpdateCheckOptions } from '../../shared/update-status-types'
 import type { ReleaseChannel } from '../../shared/release-channel'
 import { UpdaterScheduling } from './updater-scheduling'
+import { isLocalBuildVersion } from './local-build-updates'
 
 /** Handles checks initiated from the desktop menu and modifier-key variants. */
 export abstract class UpdaterMenuChecks extends UpdaterScheduling {
   protected checkForUpdatesFromMenu(options?: UpdateCheckOptions): void {
-    if (!app.isPackaged || is.dev) {
+    if (!app.isPackaged || is.dev || isLocalBuildVersion(app.getVersion())) {
       this.sendStatus({ state: 'not-available', userInitiated: true })
       return
     }
